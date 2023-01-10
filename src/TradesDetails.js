@@ -10,6 +10,7 @@ const Web3 = require("web3");
         <div className="app-details" style={{marginTop:'5px'}}>
         <h5>TRADE DETAILS BY INDEXED : </h5>
          {TradeDetailsByIds?.map(item=>{
+            console.log("Item:",item.acceptTrade)
             return <p>
             <br/>TradeNumber : {item[0]},
             <br/>AssetName : {item[1]},
@@ -18,8 +19,8 @@ const Web3 = require("web3");
             <br/>BuyerAddress : {item[4]},
             <br/>Amount : {Web3.utils.fromWei(item[5])},
             <br/>BLHash : {item[6]},
-            <br/>AcceptTrade : {item[7]},
-            <br/>VerifyBL : {item[8]},
+            <br/>AcceptTrade : {item[7]?'True':'False'},
+            <br/>VerifyBL : {item[8]?'True':'False'},
             <br/>TradeType : {item[9]}
             </p>     
         })}

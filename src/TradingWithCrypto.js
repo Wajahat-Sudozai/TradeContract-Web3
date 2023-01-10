@@ -124,6 +124,7 @@ const TradingWithCrypto = ({ web3Obj, userInfo }) => {
   };
   const onCreateTrade = async (e) => { // ! Creating Trade
     e.preventDefault();
+    var methodss = new web3Obj.eth.Contract(tradingToken.ABI, tradingToken.contractAddress)
     var methods = new web3Obj.eth.Contract(tradingWithCrypto.ABI, tradingWithCrypto.contractAddress)
     console.log(amount)
     let x=new Decimal(amount);
@@ -135,10 +136,23 @@ const TradingWithCrypto = ({ web3Obj, userInfo }) => {
       EXPONENTIAL_AT: 30,
     });
     console.log("Big Number : ",number.valueOf());
+    if( tradeType === '3'){
+      const Approve = await methodss.methods.approve(tradingWithCrypto.contractAddress, number).send({
+        from: userInfo.account
+      });
+      console.log(Approve);
+      if(Approve.status===true){
+        const result = await methods.methods.createtrade(tradeId, assetName, currency, address, number, tradeType).send({
+          from: userInfo.account,
+        });
+        console.log(result)
+      }
+    }else{
     const result = await methods.methods.createtrade(tradeId, assetName, currency, address, number, tradeType).send({
       from: userInfo.account,
-    })
+    });
     console.log(result)
+    }
     setTradeId("");
     setAssetName("");
     setCurrency("");
@@ -169,11 +183,29 @@ const TradingWithCrypto = ({ web3Obj, userInfo }) => {
   };
   const onAgreeToTrade = async (e) => { // ! Agree to Trade
     e.preventDefault();
+    var methodss = new web3Obj.eth.Contract(tradingToken.ABI, tradingToken.contractAddress)
     var methods = new web3Obj.eth.Contract(tradingWithCrypto.ABI, tradingWithCrypto.contractAddress)
-    const result = await methods.methods.agreeToTrade(tradeId).send({
-      from: userInfo.account,
-    });
-    console.log(result)
+    const response=await methods.methods.batchDetailsTrades([tradeId]).call();
+    console.log(response);
+    const type=response[0].tradeType;
+    const number=response[0].totalAmount;
+    console.log("Trade Type : "+type);
+    console.log("Total price : "+number);
+    if( type === '1' || type === '2'){
+      const Approve = await methodss.methods.approve(tradingWithCrypto.contractAddress, number).send({
+        from: userInfo.account
+      });
+      console.log(Approve);
+      if(Approve.status===true){
+      const result = await methods.methods.agreeToTrade(tradeId).send({
+        from: userInfo.account,
+      });
+      console.log(result)
+      }
+    }
+    else{
+      console.log("Error");
+    }
     setTradeId("");
   };
   const onUpdateBL = async (e) => { // ! Update BL
@@ -384,7 +416,7 @@ const TradingWithCrypto = ({ web3Obj, userInfo }) => {
         </div>
         <button className="marginTop">All Trading Details</button>
       </form>
-      <TradesDetails TradeDetailsByIds={tradeDetailsByIds} AuctionByIds={tradeByIds} />
+      <TradesDetails TradeDetailsByIds={tradeDetailsByIds} TradeByIds={tradeByIds} />
     
     </>
   )
